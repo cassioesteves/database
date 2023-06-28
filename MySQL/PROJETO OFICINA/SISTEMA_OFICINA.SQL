@@ -1,0 +1,306 @@
+O Sistema do Seu Jose - A Oficina 
+
+EXERCICIO DE FIXACAO
+
+1) CRIE UM BANCO DE DADOS CHAMADO PROJETO E CONECTE-SE AO BANCO.
+	CREATE DATABASE AUTOCENTER;
+
+2) FAÇA A SEGUINTE MODELAGEM
+
+	SR JOSE QUER MODERNIZAR A SUA OFICINA, E POR ENQUANTO, CADASTRAR OS CARROS QUE ENTRAM PARA REALIZAR OS SERVICOS E OS SEUS RESPECTIVOS DONOS.
+	SR JOSE MENCIONOU QUE CADA CLIENTE POSSUI APENAS UM CARRO. UM CARRO POSSUI UMA MARCA. SR JOSE TAMBEM QUER SABER AS CORES DOS CARROS PARA TER 
+	IDEIA DE QUAL TINTA COMPRAR, E INFORMAR QUE UM CARRO PODE TER MAIS DE UMA COR. SR JOSE NECESSITA ARMAZENAR OS TELEFONES DOS CLIENTE, MAS NAO QUER
+	QUE ELES SEJAM OBRIGADO.
+
+PROJETO.
+
+CREATE DATABASE OFICINA;
+
+USE OFICINA;
+-- Geração de Modelo físico
+
+
+CREATE TABLE CLIENTE(
+	IDCLIENTE INT PRIMARY KEY AUTO_INCREMENT,
+	NOME VARCHAR(30) NOT NULL,
+	SEXO ENUM('M','F')
+	);
+
+CREATE TABLE TELEFONE(
+	IDTELEFONE INT PRIMARY KEY AUTO_INCREMENT,
+	NUMERO INT,
+	TIPO ENUM('CEL','RES','COM'),
+	ID_CLIENTE INT,
+	FOREIGN KEY(ID_CLIENTE)
+	REFERENCES CLIENTE(IDCLIENTE)
+	);
+
+DROP TABLE TELEFONE;
+
+ALTER TABLE TELEFONE /* APAGAR UMA ALTERANDO A TIPAGEM*/
+	CHANGE NUMERO NUMERO VARCHAR(10);
+
+
+ALTER TABLE TELEFONE
+	CHANGE ID_CLIENTE INT NOT NULL ID_CLIENTE INT; /*NAO FOI POSSIVEL ALTERAR UMA TABELA JA COM REGISTRO*/
+
+CREATE TABLE CARROS(
+	IDCARRO INT PRIMARY KEY AUTO_INCREMENT,
+	MARCA VARCHAR(30) NOT NULL,
+	ID_CLIENTE INT NOT NULL,
+	FOREIGN KEY(ID_CLIENTE)
+	REFERENCES CLIENTE(IDCLIENTE)
+	);
+
+ALTER TABLE CARROS /* APAGAR UMA ALTERANDO A TIPAGEM*/
+	CHANGE MARCA MARCA VARCHAR(30) NOT NULL;
+
+ALTER TABLE CARROS /* APAGAR UMA COLUNA*/
+	DROP COLUMN COR;
+
+CREATE TABLE CORES(
+	IDCOR INT PRIMARY KEY AUTO_INCREMENT,
+	COR VARCHAR(30),
+	ID_CLIENTE INT NOT NULL,
+	FOREIGN KEY(ID_CLIENTE) 
+	REFERENCES CLIENTE(IDCLIENTE)
+	);
+
+ALTER TABLE CORES /* APAGAR UMA ALTERANDO A TIPAGEM*/
+	CHANGE COR COR VARCHAR(30) NOT NULL;
+
+	CLIENTE
+INSERT INTO CLIENTE VALUES(NULL,'FULANO','M');
+INSERT INTO CLIENTE VALUES(NULL,'BIA','F');
+INSERT INTO CLIENTE VALUES(NULL,'BELTRANO','M');
+INSERT INTO CLIENTE VALUES(NULL,'DIANA','F');
+INSERT INTO CLIENTE VALUES(NULL,'CICRANO','M');
+INSERT INTO CLIENTE VALUES(NULL,'PALYBOY','M');
+
+SELECT * FROM CLIENTE;
+
+	TELEFONE
+INSERT INTO TELEFONE VALUES(NULL,'1192020301','CEL',4);
+INSERT INTO TELEFONE VALUES(NULL,'1140309092','RES',4);
+INSERT INTO TELEFONE VALUES(NULL,'1130308034','COM',4);
+INSERT INTO TELEFONE VALUES(NULL,'2130506049','CEL',3);
+INSERT INTO TELEFONE VALUES(NULL,'2198080408','RES',2);
+INSERT INTO TELEFONE VALUES(NULL,'1192020303','CEL',6);
+
+SELECT * FROM TELEFONE;
+
+	CARROS
+INSERT INTO CARROS VALUES(NULL,'LAND ROVER',2);
+INSERT INTO CARROS VALUES(NULL,'SUBURBAN',5); /*NAO ESTA APRECENDO*/
+INSERT INTO CARROS VALUES(NULL,'JAGUAR F-PACE',1); /*NAO ESTA APRECENDO*/
+INSERT INTO CARROS VALUES(NULL,'BLAZER EXECUTIVE',4);
+INSERT INTO CARROS VALUES(NULL,'DUSTER 4X4',3);
+INSERT INTO CARROS VALUES(NULL,'FERRARI SF90',6);
+
+SELECT * FROM CARROS;
+
+	CORES
+INSERT INTO CORES VALUES(NULL,'AZUL MARINHO',2);
+INSERT INTO CORES VALUES(NULL,'PRETO',5);
+INSERT INTO CORES VALUES(NULL,'VERMELHO',1);
+INSERT INTO CORES VALUES(NULL,'VERDE',4);
+INSERT INTO CORES VALUES(NULL,'DOURADO',4);
+INSERT INTO CORES VALUES(NULL,'MARROM',3);
+INSERT INTO CORES VALUES(NULL,'PRETO',3);
+INSERT INTO CORES VALUES(NULL,'VERMELHO',6);
+INSERT INTO CORES VALUES(NULL,'VERDE',6);
+INSERT INTO CORES VALUES(NULL,'BRANCO',6);
+
+SELECT * FROM CORES;
+
+*-*-*-*
+
+SELECT * FROM CLIENTE;
+SELECT * FROM TELEFONE;
+SELECT * FROM CARROS;
+SELECT * FROM CORES;
+
+/*NESSE COMANDO LEFT JOIN EM TELEFOEN IR*/
+SELECT C.IDCLIENTE, C.NOME, C.SEXO, 
+	   TEL.IDTELEFONE, TEL.NUMERO, TEL.TIPO, TEL.ID_CLIENTE AS ID_TEL_CLIENTE, 
+	   CAR.IDCARRO, CAR.MARCA, CAR.ID_CLIENTE AS ID_CARRO_CLIENTE, 
+	   COLOR.IDCOR, COLOR.COR, COLOR.ID_CLIENTE AS ID_COLOR_CLIENTE
+	FROM CLIENTE C
+	LEFT JOIN TELEFONE TEL   /*USANDO O LEFT JOIN TODOS DADOS DA TABELA CLIENTE E TELEFONE*/
+	ON C.IDCLIENTE = TEL.ID_CLIENTE
+	INNER JOIN CARROS CAR
+	ON C.IDCLIENTE = CAR.ID_CLIENTE
+	INNER JOIN CORES COLOR
+	ON C.IDCLIENTE = COLOR.ID_CLIENTE
+	ORDER BY IDCLIENTE;
+
+/*USANDO O LEFT JOIN E INFORMANDO AS TABELAS NULAS COM A CLAUSULA WHERE TEL.ID_CLIENTE IS NULL */
+SELECT C.IDCLIENTE, C.NOME, C.SEXO, 
+	   TEL.IDTELEFONE, TEL.NUMERO, TEL.TIPO, TEL.ID_CLIENTE AS ID_TEL_CLIENTE, 
+	   CAR.IDCARRO, CAR.MARCA, CAR.ID_CLIENTE AS ID_CARRO_CLIENTE, 
+	   COLOR.IDCOR, COLOR.COR, COLOR.ID_CLIENTE AS ID_COLOR_CLIENTE
+	FROM CLIENTE C
+	LEFT JOIN TELEFONE TEL   /*USANDO O LEFT JOIN TODOS DADOS DA TABELA CLIENTE E TELEFONE*/
+	ON C.IDCLIENTE = TEL.ID_CLIENTE
+	INNER JOIN CARROS CAR
+	ON C.IDCLIENTE = CAR.ID_CLIENTE
+	INNER JOIN CORES COLOR
+	ON C.IDCLIENTE = COLOR.ID_CLIENTE
+	WHERE TEL.ID_CLIENTE IS NULL  /*IRA TRAZER SOMENTE OS CAMPOS VAZIO DA ID_TELEFONE_CLIENTE*/
+	ORDER BY IDCLIENTE;
+
+
+/*CONSTRAINT */
+
+COMANDO PARA CRIAR E ALTERAR AS CONSTRAINT
+
+TELEFONE
+ALTER TABLE TELEFONE ADD CONSTRAINT FK_CLIENTE_TELEFONE
+ FOREIGN KEY(ID_CLIENTE) REFERENCES CLIENTE(IDCLIENTE);
+
+CARROS
+ALTER TABLE CARROS ADD CONSTRAINT FK_CLIENTE_CARROS
+ FOREIGN KEY(ID_CLIENTE) REFERENCES CLIENTE(IDCLIENTE);
+
+CORES
+ALTER TABLE CORES ADD CONSTRAINT FK_CLIENTE_CORES
+ FOREIGN KEY(ID_CLIENTE) REFERENCES CLIENTE(IDCLIENTE);
+
+
+
+SHOW CREATE TABLE CLIENTE;
+SHOW CREATE TABLE TELEFONE;
+SHOW CREATE TABLE CARROS;
+SHOW CREATE TABLE CORES;
+
+
+/* APAGANDO CONSTRAINTS*/
+
+ALTER TABLE TELEFONE
+	DROP FOREIGN KEY FK_CLIENTE_TELEFONE;
+
+	/*TESTE*/
+ALTER TABLE TELEFONE
+	DROP FOREIGN KEY telefone_ibfk_1;
+
+ALTER TABLE CARROS
+	DROP FOREIGN KEY carros_ibfk_1;
+
+ALTER TABLE CORES
+	DROP FOREIGN KEY cores_ibfk_1;
+
+
+											CONSTRAINT ALTERADA DAS TABELAS CLIENTE TELEFONE (SOMENTE A TELEFONE E AFETADA)
+mysql> SHOW CREATE TABLE CLIENTE;
++---------+-----------------------------------
+----------------------------------------+
+| Table   | Create Table
+                                        |
++---------+-----------------------------------
+----------------------------------------+
+| CLIENTE | CREATE TABLE `cliente` (
+  `IDCLIENTE` int(11) NOT NULL AUTO_INCREMENT,
+  `NOME` varchar(30) NOT NULL,
+  `SEXO` enum('M','F') DEFAULT NULL,
+  PRIMARY KEY (`IDCLIENTE`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++---------+-----------------------------------
+----------------------------------------+
+1 row in set (0.00 sec)
+
+													*-*-*-*-*-*-*
+
+mysql> SHOW CREATE TABLE CLIENTE;
++---------+-----------------------------------
+----------------------------------------+
+| Table   | Create Table
+                                        |
++---------+-----------------------------------
+----------------------------------------+
+| CLIENTE | CREATE TABLE `cliente` (
+  `IDCLIENTE` int(11) NOT NULL AUTO_INCREMENT,
+  `NOME` varchar(30) NOT NULL,
+  `SEXO` enum('M','F') DEFAULT NULL,
+  PRIMARY KEY (`IDCLIENTE`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++---------+-----------------------------------
+													*-*-*-*-*-*-*
+----------------------------------------+
+1 row in set (0.01 sec)
+
+| TELEFONE | CREATE TABLE `telefone` (
+  `IDTELEFONE` int(11) NOT NULL AUTO_INCREMENT,
+  `NUMERO` int(11) DEFAULT NULL,
+  `TIPO` enum('CEL','RES','COM') DEFAULT NULL,
+  `ID_CLIENTE` int(11) NOT NULL,
+  PRIMARY KEY (`IDTELEFONE`),
+  KEY `FK_CLIENTE_TELEFONE` (`ID_CLIENTE`),
+  CONSTRAINT `FK_CLIENTE_TELEFONE` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`),  /* NOVO REGISTRO*/
+  CONSTRAINT `telefone_ibfk_1` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`) /*REGISTRO ALTERADO E EXCLUIDO */
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++----------+--------------------------------------------------------------------------------------
++--------+-----------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+-----------------+
+1 row in set (0.01 sec)
+
++-------+------------------------------------------------------------------------------------
+													*-*-*-*-*-*-*
+---------------------------------------------------------------------------------------------
+| Table | Create Table
+
++-------+------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+| CORES | CREATE TABLE `cores` (
+  `IDCOR` int(11) NOT NULL AUTO_INCREMENT,
+  `COR` varchar(30) DEFAULT NULL,
+  `ID_CLIENTE` int(11) NOT NULL,
+  PRIMARY KEY (`IDCOR`),
+  KEY `ID_CLIENTE` (`ID_CLIENTE`),
+  CONSTRAINT `cores_ibfk_1` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`) /*REGISTRO ALTERADO */
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++-------+------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+1 row in set (0.00 sec)
+
+													*-*-*-*-*-*-*
+
+										CONSTRAINT ALTERADA DAS TABELAS CARROS E CORES
+
+| CARROS | CREATE TABLE `carros` (
+  `IDCARRO` int(11) NOT NULL AUTO_INCREMENT,
+  `MARCA` varchar(30) DEFAULT NULL,
+  `COR` varchar(30) DEFAULT NULL,
+  `ID_CLIENTE` int(11) NOT NULL,
+  PRIMARY KEY (`IDCARRO`),
+  KEY `FK_CLIENTE_CARROS` (`ID_CLIENTE`),
+  CONSTRAINT `FK_CLIENTE_CARROS` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`), /* NOVO REGISTRO*/
+  CONSTRAINT `carros_ibfk_1` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`) /*REGISTRO ALTERADO E EXCLUIDO */
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++--------+-------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+1 row in set (0.00 sec)
+
++-------+--------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+| Table | Create Table
+
+                                                                           |
++-------+--------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+| CORES | CREATE TABLE `cores` (
+  `IDCOR` int(11) NOT NULL AUTO_INCREMENT,
+  `COR` varchar(30) DEFAULT NULL,
+  `ID_CLIENTE` int(11) NOT NULL,
+  PRIMARY KEY (`IDCOR`),
+  KEY `FK_CLIENTE_CORES` (`ID_CLIENTE`),
+  CONSTRAINT `FK_CLIENTE_CORES` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`),  /* NOVO REGISTRO*/
+  CONSTRAINT `cores_ibfk_1` FOREIGN KEY (`ID_CLIENTE`) REFERENCES `cliente` (`IDCLIENTE`) /*REGISTRO ALTERADO E EXCLUIDO */
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
++-------+--------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------+
+1 row in set (0.00 sec)
